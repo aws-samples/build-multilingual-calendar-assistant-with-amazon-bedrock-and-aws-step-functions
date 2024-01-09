@@ -1,7 +1,7 @@
 import aws_cdk as core
 import aws_cdk.assertions as assertions
 
-from genai_calendar_agent.genai_calendar_agent_stack import GenaiCalendarAgentStack
+from src.genai_calendar_agent_stack import GenaiCalendarAgentStack
 
 # example tests. To run these tests, uncomment this file along with the example
 # resource in genai_calendar_agent/genai_calendar_agent_stack.py

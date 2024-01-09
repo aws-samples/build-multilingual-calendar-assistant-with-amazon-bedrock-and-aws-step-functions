@@ -3,7 +3,7 @@ import os
 
 import aws_cdk as cdk
 
-from genai_calendar_agent.genai_calendar_agent_stack import GenaiCalendarAgentStack
+from src.genai_calendar_agent_stack import GenaiCalendarAgentStack
 
 
 app = cdk.App()
@@ -21,6 +21,7 @@ GenaiCalendarAgentStack(app, "GenaiCalendarAgentStack",
     # want to deploy the stack to. */
 
     #env=cdk.Environment(account='123456789012', region='us-east-1'),
+    env=cdk.Environment(region='us-east-1')
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
     )
