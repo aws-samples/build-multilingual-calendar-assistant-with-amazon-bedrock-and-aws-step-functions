@@ -20,9 +20,10 @@ tz = pytz.timezone(timezone_string)
 
 def lambda_handler(event, context):
   #get values from calendar_event
-  subject = event['subject']
-  body = event['body']
-  location = event['location']
+  subject = "[AI Assistant] " + event['subject']
+  body = "[AI Assistant found an event and here is the summary]: \n " + event['body']
+  raw_body = "[Original message is]: \n " + event['raw_body']
+  location = event.get("location", "N/A") #if location does not exist, set it to N/A
   
   start_datetime = dt.datetime.strptime(event['start_datetime'], '%Y-%m-%dT%H:%M:%SZ')
   start_datetime = tz.localize(start_datetime)
@@ -69,8 +70,8 @@ def lambda_handler(event, context):
   msg["Content-class"] = "urn:content-classes:calendarmessage"
 
   # Set message body
-  body = MIMEText(event['body'], "plain")
-  msg.attach(body)
+  msg_body = body + "\n\n" + raw_body
+  msg.attach(MIMEText(msg_body, "plain"))
 
   filename = "invite.ics"
   part = MIMEBase('text', "calendar", method="REQUEST", name=filename)
@@ -90,8 +91,14 @@ def lambda_handler(event, context):
   )
 
 if __name__ == "__main__":
+  
+  # In order to run this locally, setup the following environment variables:
+  # export SENDER=your_email@domain.com
+  # export RECIPIENT=your_email@domain.com
+  
   data = {
     "subject": "event subject",
+    "raw_body": "event raw body",
     "body": "event body",
     "start_datetime": "2024-01-08T14:00:00Z",
     "end_datetime": "2024-01-08T14:15:00Z",

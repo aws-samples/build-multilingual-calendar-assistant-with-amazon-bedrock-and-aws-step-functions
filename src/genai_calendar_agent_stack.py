@@ -58,13 +58,8 @@ class GenaiCalendarAgentStack(Stack):
         
         
         # Define step function individual tasks
-        data = {}
-        data['raw_body'] = 'value'
-        json_data = json.dumps(data)
-
         get_raw_content_job = sfn.Pass(
-            self, "get_content_body",
-            result=sfn.Result.from_object(data),
+            self, "get_content_body"
         )
         
         prompt_generator_job = tasks.LambdaInvoke(
@@ -100,9 +95,7 @@ class GenaiCalendarAgentStack(Stack):
         send_email_job = tasks.LambdaInvoke(
             self, "send_email_job",
             lambda_function=send_calendar_reminder_function, 
-            result_selector={
-                "prompt": sfn.JsonPath.string_at("$")
-            }
+            input_path="$.invoke.parameters"
         )
         
         item_processor_chain = before_send_email_pass_job.next(send_email_job)

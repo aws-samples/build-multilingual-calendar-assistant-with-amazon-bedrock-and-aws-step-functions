@@ -6,15 +6,7 @@ from datetime import datetime
 def lambda_handler(event, context):
     
     raw_body = event['raw_body']
-    
-    raw_body = '''
-    Dear John and Cari Smith:
-    
-    Please join us as we celebrate our store's soft opening on Dec. 20 at noon at main street 123, NY.
-    
-    We've been working hard to open the doors of Honey and Lemon Food and Drink, and we want to invite our most generous supporters for a special night before our grand opening. We plan to provide light snacks and drinks. Please RSVP to confirm your attendance by wed
- 
-    '''
+
     # Get the current UTC date and time
     current_UTC = datetime.utcnow()
     
@@ -35,6 +27,7 @@ Please perform the following tasks for the content:
     Note 1: Do not make up answers. 
     Note 2: Always use UTC for date and time. The current time UTC is {current_UTC}.
     Note 3: If you can not determine the start_date_time or end_date_time of the action, set the missing start_date_time as the noon the day after the current time, and the end time is one hour after start.
+    Note 4: If you can not determine location, set it as "N/A"
     5. For each action, call a tool named "create-calendar-reminder" and provide all information from the action as parameter. You may call this tool like this. Only invoke one function at a time and wait for the results before
     invoking another function. Store the all function calls as array in result_json.function_calls 
     [
@@ -43,6 +36,7 @@ Please perform the following tasks for the content:
                 "tool_name": "create-calendar-reminder",
                 "parameters": {
                     "body": "(the summary of raw content)",
+                    "raw_body": "the original raw_body without <raw_body> xml tag",
                     (all parameters of the action, for example: subject, start and end date time, location etc. )
                 }
             }
