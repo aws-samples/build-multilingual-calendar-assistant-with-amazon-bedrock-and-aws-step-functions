@@ -23,7 +23,7 @@ easy to extend and can include human interaction (e.g. review LLM output and the
 - SQS/APIGW
 - Raw content always is a json 
 
-## LLM (Todo: Use CDK and hope it also fix the permission from step function to bedrock)
+## LLM ()
 - Bedrock Claude v2 
 - Max token: 2000?
 - Using lambda for generating prompt - easy to manage (than step function built-in). Todo: store prompt template in dynamoDB in the future
@@ -34,6 +34,8 @@ easy to extend and can include human interaction (e.g. review LLM output and the
 ---- We might have to convert the native LLM call step function to lambda, in order to handle json result parser. The native LLM call is too simple (that is why we need framework like langchian)
 ---- 
 ---- Maybe bedrock agent??? (agent does not work)
+### TODO
+retry for LLM task
 
 ## send reminder lambda
 
@@ -47,3 +49,5 @@ easy to extend and can include human interaction (e.g. review LLM output and the
 - store the following in secrete manager (export GOOGLE_APPLICATION_CREDENTIALS=./google-key.json)
     - google service account key
     - shared calendar id
+
+

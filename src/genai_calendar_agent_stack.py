@@ -2,8 +2,10 @@ import json
 import aws_cdk as core
 from aws_cdk import (
     Duration,
-    aws_iam as iam,
     Stack,
+    aws_iam as iam,
+    aws_logs as logs,
+    aws_apigateway as apigateway,
     aws_lambda as lambda_,
     aws_bedrock as bedrock,
     aws_stepfunctions as sfn,
@@ -64,7 +66,8 @@ class GenaiCalendarAgentStack(Stack):
         
         prompt_generator_job = tasks.LambdaInvoke(
             self, "prompt_generator_job",
-            lambda_function=prompt_generator_function, 
+            lambda_function=prompt_generator_function,
+            input_path="$.body", #as we are getting input from apigw
             result_selector={
                 "prompt": sfn.JsonPath.string_at("$.Payload.prompt")
             }
@@ -75,11 +78,18 @@ class GenaiCalendarAgentStack(Stack):
             model=model,
             body=sfn.TaskInput.from_object({
                 "prompt.$": "$.prompt",
-                "max_tokens_to_sample": 2000
-                }),
+                "max_tokens_to_sample": 5000
+            }),
             result_selector={
                 "completion.$": "States.StringToJson($.Body.completion)"
-                }
+            }
+        )
+        
+        # a simple retry in case LLM did not return a valid json, try it again will most likely fix that
+        bedrock_extract_event_job.add_retry(
+            interval=Duration.seconds(5), 
+            max_attempts=5,
+            max_delay=Duration.seconds(10)
         )
 
         # Map all extracted events and send email reminders
@@ -103,7 +113,19 @@ class GenaiCalendarAgentStack(Stack):
         
         chain = get_raw_content_job.next(prompt_generator_job).next(bedrock_extract_event_job).next(individual_reminder_map_job_container).next(sfn.Succeed(self, "Done"))
         
+        log_group = logs.LogGroup(self, "GenAI-Calendar-Assistant-StepFunction-LogGroup")
         
         state_machine = sfn.StateMachine(
             self, "GenAI-Calendar-Assistant",
-            definition_body=sfn.DefinitionBody.from_chainable(chain))
+            state_machine_type=sfn.StateMachineType.EXPRESS,
+            definition_body=sfn.DefinitionBody.from_chainable(chain),
+            logs=sfn.LogOptions(
+                 destination=log_group,
+                level=sfn.LogLevel.ALL,
+                include_execution_data=True
+            )
+        )
+        
+        apigw = apigateway.StepFunctionsRestApi(self, 
+                    "GenAI-Calendar-Assistant-APIGW",
+                    state_machine = state_machine)
