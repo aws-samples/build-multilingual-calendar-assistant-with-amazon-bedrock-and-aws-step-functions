@@ -11,16 +11,15 @@ Instead of putting all logics into a monopole application, it uses AWS Step Func
 easy to extend and can include human interaction (e.g. review LLM output and then take actions). It can do more than Bedrock agent as supporting mutlipe actions and logic/condition/human-interaction
 
 ### Workflow
-- Get input (SQS or APIGW from gmail webhook)
+- Get input via APIGW
 - Call lambda for generating prompt (pre-reasoning)
 - LLM for extract action items in Json (reasoning)
 - Step function MAP for looping action item (executing)
 -- For each "create reminder item" action, call lambda for sending meeting invitation as reminder
 
 
-## Incoming data (TODO)
-- Gmail (Gmail webhook?)
-- SQS/APIGW
+## Incoming data)
+- Zapier email hooker -> APIGW -> StepFunction
 - Raw content always is a json 
 
 ## LLM ()
@@ -34,8 +33,8 @@ easy to extend and can include human interaction (e.g. review LLM output and the
 ---- We might have to convert the native LLM call step function to lambda, in order to handle json result parser. The native LLM call is too simple (that is why we need framework like langchian)
 ---- 
 ---- Maybe bedrock agent??? (agent does not work)
-### TODO
-retry for LLM task
+
+
 
 ## send reminder lambda
 

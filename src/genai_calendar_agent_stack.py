@@ -26,6 +26,13 @@ class GenaiCalendarAgentStack(Stack):
             handler="prompt_generator.lambda_handler"
         )
         
+        llm_output_parser_function = lambda_.Function(
+            self, "llm_output_parser",
+            code=lambda_.Code.from_asset("./src/lambda"),
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            handler="llm_output_parser.lambda_handler"
+        )
+        
         send_calendar_reminder_function = lambda_.Function(
             self,"send_calendar_reminder",
             runtime=lambda_.Runtime.PYTHON_3_9,
@@ -64,24 +71,25 @@ class GenaiCalendarAgentStack(Stack):
             self, "get_content_body"
         )
         
-        prompt_generator_job = tasks.LambdaInvoke(
-            self, "prompt_generator_job",
+        generate_prompt_job = tasks.LambdaInvoke(
+            self, "generate_prompt_job",
             lambda_function=prompt_generator_function,
-            input_path="$.body", #as we are getting input from apigw
+            input_path="$.body", # as we are getting input from api gateway
             result_selector={
                 "prompt": sfn.JsonPath.string_at("$.Payload.prompt")
             }
         )
-        
+
+
         model = bedrock.FoundationModel.from_foundation_model_id(self, "Model", bedrock.FoundationModelIdentifier.ANTHROPIC_CLAUDE_V2)
-        bedrock_extract_event_job = tasks.BedrockInvokeModel(self, "bedrock_extract_event_job",
+        bedrock_extract_event_job = tasks.BedrockInvokeModel(self, "llm_extract_events_job",
             model=model,
             body=sfn.TaskInput.from_object({
                 "prompt.$": "$.prompt",
                 "max_tokens_to_sample": 5000
             }),
             result_selector={
-                "completion.$": "States.StringToJson($.Body.completion)"
+                "completion.$": "$.Body.completion"
             }
         )
         
@@ -91,15 +99,23 @@ class GenaiCalendarAgentStack(Stack):
             max_attempts=5,
             max_delay=Duration.seconds(10)
         )
-
-        # Map all extracted events and send email reminders
-        individual_reminder_map_job_container = sfn.Map(self, "individual_reminder_map_job_container",
-            max_concurrency=1,
-            items_path=sfn.JsonPath.string_at("$.completion.result_json.function_calls")
+                
+        parse_llm_output_job = tasks.LambdaInvoke(
+            self, "parse_llm_output_job",
+            lambda_function=llm_output_parser_function,
+            result_selector={
+                "parsed_completion": sfn.JsonPath.string_at("$.Payload.parsed_completion")
+            }
         )
         
-        before_send_email_pass_job = sfn.Pass(
-            self, "before_send_email_pass_job"
+        # Map all extracted events and send email reminders
+        individual_reminder_map_job_container = sfn.Map(self, "individual_reminder_job_parallel_executor",
+            max_concurrency=1,
+            items_path=sfn.JsonPath.string_at("$.parsed_completion.result_json.function_calls")
+        )
+        
+        pre_processing_placeholder_job = sfn.Pass(
+            self, "pre_processing_placeholder_job"
         )
         
         send_email_job = tasks.LambdaInvoke(
@@ -108,10 +124,10 @@ class GenaiCalendarAgentStack(Stack):
             input_path="$.invoke.parameters"
         )
         
-        item_processor_chain = before_send_email_pass_job.next(send_email_job)
+        item_processor_chain = pre_processing_placeholder_job.next(send_email_job)
         individual_reminder_map_job_container.item_processor(item_processor_chain)
         
-        chain = get_raw_content_job.next(prompt_generator_job).next(bedrock_extract_event_job).next(individual_reminder_map_job_container).next(sfn.Succeed(self, "Done"))
+        chain = get_raw_content_job.next(generate_prompt_job).next(bedrock_extract_event_job).next(parse_llm_output_job).next(individual_reminder_map_job_container).next(sfn.Succeed(self, "Done"))
         
         log_group = logs.LogGroup(self, "GenAI-Calendar-Assistant-StepFunction-LogGroup")
         
