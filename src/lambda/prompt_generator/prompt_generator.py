@@ -12,10 +12,10 @@ def lambda_handler(event, context):
     
     propmt_template = '''Human: You are an helpful assistant that helps human to process the raw content. The raw content is in the <raw_body> section, and it can be in different languages such as English, Norwegian or Chinese. 
 Please perform the following tasks for the content:
-    1. Create a json object named result_json as a structured container for storing information. 
-    2. Summarize the raw content in English, and store it in result_json.summary.
+    1. Create a json object $result as a structured container for storing information. 
+    2. Summarize the raw content in English, and store it in json $result.summary field
     3. Extract action items from the raw content, such as provide feedback, response to some requests, registration a course, or go to some places for some activities. Note: it might include multiple action items, and make sure you extract all of them: for example, an invitation include RSVP and the actual event. 
-    4. For each action, store its information as an item in an array in result_json.actions in following json format:
+    4. For each action, store its information as an item in an array in $result.actions in following json format:
     [
         "action": {
             "subject": "(the action description)",
@@ -29,16 +29,14 @@ Please perform the following tasks for the content:
     Note 3: If you can not determine the start_date_time or end_date_time of the action, set the missing start_date_time as the noon the day after the current time, and the end time is one hour after start.
     Note 4: If you can not determine location, set it as "N/A"
     5. For each action, call a tool named "create-calendar-reminder" and provide all information from the action as parameter. You may call this tool like this. Only invoke one function at a time and wait for the results before
-    invoking another function. Store the all function calls as array in result_json.function_calls 
+    invoking another function. Store the all function calls as array in $result.function_calls 
     [
         "function_calls": {
-            "invoke": {
-                "tool_name": "create-calendar-reminder",
-                "parameters": {
-                    "body": "(the summary of raw content)",
-                    "raw_body": "the original raw_body without <raw_body> xml tag",
-                    (all parameters of the action, for example: subject, start and end date time, location etc. )
-                }
+            "tool_name": "create-calendar-reminder",
+            "parameters": {
+                "body": "(the summary of raw content)",
+                "raw_body": "the original raw_body without <raw_body> xml tag",
+                (all parameters of the action, for example: subject, start and end date time, location etc. )
             }
         }
     ]

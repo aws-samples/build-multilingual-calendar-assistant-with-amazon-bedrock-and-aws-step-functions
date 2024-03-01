@@ -1,0 +1,41 @@
+{
+  "summary": "The content is an invitation to a soft opening event for Honey and Lemon Food and Drink on January 20 at 11 AM at 123 Main Street, NY. It requests attendees to RSVP by Wednesday to confirm attendance.",
+  "actions": [
+    {
+      "subject": "RSVP for the soft opening event for Honey and Lemon Food and Drink",
+      "start_datetime": "2024-01-18T12:00:00Z",
+      "end_datetime": "2024-01-18T13:00:00Z",
+      "location": "N/A"
+    },
+    {
+      "subject": "Attend the soft opening event for Honey and Lemon Food and Drink",
+      "start_datetime": "2024-01-20T11:00:00Z",
+      "end_datetime": "2024-01-20T12:00:00Z",
+      "location": "123 Main Street, NY"
+    }
+  ],
+  "function_calls": [
+    {
+      "tool_name": "create-calendar-reminder",
+      "parameters": {
+        "body": "The content is an invitation to a soft opening event for Honey and Lemon Food and Drink on January 20 at 11 AM at 123 Main Street, NY. It requests attendees to RSVP by Wednesday to confirm attendance.",
+        "raw_body": "Please join us as we celebrate our store's soft opening on Jan. 20 at 11.00 at main street 123, NY. We've been working hard to open the doors of Honey and Lemon Food and Drink, and we want to invite our most generous supporters for a special night before our grand opening. We plan to provide light snacks and drinks. Please RSVP to confirm your attendance by Wed.",
+        "subject": "RSVP for the soft opening event for Honey and Lemon Food and Drink",
+        "start_datetime": "2024-01-18T12:00:00Z",
+        "end_datetime": "2024-01-18T13:00:00Z",
+        "location": "N/A"
+      }
+    },
+    {
+      "tool_name": "create-calendar-reminder",
+      "parameters": {
+        "body": "The content is an invitation to a soft opening event for Honey and Lemon Food and Drink on January 20 at 11 AM at 123 Main Street, NY. It requests attendees to RSVP by Wednesday to confirm attendance.",
+        "raw_body": "Please join us as we celebrate our store's soft opening on Jan. 20 at 11.00 at main street 123, NY. We've been working hard to open the doors of Honey and Lemon Food and Drink, and we want to invite our most generous supporters for a special night before our grand opening. We plan to provide light snacks and drinks. Please RSVP to confirm your attendance by Wed.",
+        "subject": "Attend the soft opening event for Honey and Lemon Food and Drink",
+        "start_datetime": "2024-01-20T11:00:00Z",
+        "end_datetime": "2024-01-20T12:00:00Z",
+        "location": "123 Main Street, NY"
+      }
+    }
+  ]
+}

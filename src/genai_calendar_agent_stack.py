@@ -21,16 +21,18 @@ class GenaiCalendarAgentStack(Stack):
 
         prompt_generator_function = lambda_.Function(
             self, "prompt_generator", 
-            code=lambda_.Code.from_asset("./src/lambda"),
             runtime=lambda_.Runtime.PYTHON_3_9,
-            handler="prompt_generator.lambda_handler"
+            handler="prompt_generator.lambda_handler",
+            code=lambda_.Code.from_asset("./src/lambda/prompt_generator")
         )
         
         llm_output_parser_function = lambda_.Function(
             self, "llm_output_parser",
-            code=lambda_.Code.from_asset("./src/lambda"),
             runtime=lambda_.Runtime.PYTHON_3_9,
-            handler="llm_output_parser.lambda_handler"
+            handler="llm_output_parser.lambda_handler",
+            code=lambda_.Code.from_asset(
+                "./src/lambda/llm_output_parser"
+            ),
         )
         
         send_calendar_reminder_function = lambda_.Function(
@@ -43,7 +45,7 @@ class GenaiCalendarAgentStack(Stack):
                 "TIMEZONE": "Europe/Oslo"
             },
             code=lambda_.Code.from_asset(
-                "./src/lambda",
+                "./src/lambda/send_calendar_reminder",
                 bundling=core.BundlingOptions(
                     image=lambda_.Runtime.PYTHON_3_9.bundling_image,
                     command=[
@@ -111,7 +113,7 @@ class GenaiCalendarAgentStack(Stack):
         # Map all extracted events and send email reminders
         individual_reminder_map_job_container = sfn.Map(self, "individual_reminder_job_parallel_executor",
             max_concurrency=1,
-            items_path=sfn.JsonPath.string_at("$.parsed_completion.result_json.function_calls")
+            items_path=sfn.JsonPath.string_at("$.parsed_completion.function_calls")
         )
         
         pre_processing_placeholder_job = sfn.Pass(
@@ -121,7 +123,7 @@ class GenaiCalendarAgentStack(Stack):
         send_email_job = tasks.LambdaInvoke(
             self, "send_email_job",
             lambda_function=send_calendar_reminder_function, 
-            input_path="$.invoke.parameters"
+            input_path="$.parameters"
         )
         
         item_processor_chain = pre_processing_placeholder_job.next(send_email_job)
