@@ -3,6 +3,7 @@ import aws_cdk as core
 from aws_cdk import (
     Duration,
     Stack,
+    CfnParameter,
     aws_iam as iam,
     aws_logs as logs,
     aws_apigateway as apigateway,
@@ -18,6 +19,20 @@ class GenaiCalendarAgentStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+        
+        sender_email = CfnParameter(self, 
+                        "senderEmail", 
+                        type="String", 
+                        description="The sender email address.",
+                        default="undefined" # Set default to undefined
+                    )
+        
+        recipient_email = CfnParameter(self, 
+                        "recipientEmail", 
+                        type="String", 
+                        description="The recipient email address.",
+                        default="undefined" # Set default to undefined
+                    )
 
         prompt_generator_function = lambda_.Function(
             self, "prompt_generator", 
@@ -40,8 +55,8 @@ class GenaiCalendarAgentStack(Stack):
             runtime=lambda_.Runtime.PYTHON_3_9,
             handler="send_calendar_reminder.lambda_handler",
             environment={
-                "SENDER": "lufng@amazon.com",
-                "RECIPIENT": "lufng@amazon.com",
+                "SENDER": sender_email.value_as_string,
+                "RECIPIENT": recipient_email.value_as_string,
                 "TIMEZONE": "Europe/Oslo"
             },
             code=lambda_.Code.from_asset(
@@ -147,3 +162,5 @@ class GenaiCalendarAgentStack(Stack):
         apigw = apigateway.StepFunctionsRestApi(self, 
                     "GenAI-Calendar-Assistant-APIGW",
                     state_machine = state_machine)
+        
+        core.CfnOutput(self, "APIUrl", value=apigw.url)
