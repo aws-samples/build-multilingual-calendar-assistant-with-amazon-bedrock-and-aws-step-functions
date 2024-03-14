@@ -84,10 +84,6 @@ class GenaiCalendarAgentStack(Stack):
         
         
         # Define step function individual tasks
-        get_raw_content_job = sfn.Pass(
-            self, "get_content_body"
-        )
-        
         generate_prompt_job = tasks.LambdaInvoke(
             self, "generate_prompt_job",
             lambda_function=prompt_generator_function,
@@ -144,7 +140,7 @@ class GenaiCalendarAgentStack(Stack):
         item_processor_chain = pre_processing_placeholder_job.next(send_email_job)
         individual_reminder_map_job_container.item_processor(item_processor_chain)
         
-        chain = get_raw_content_job.next(generate_prompt_job).next(bedrock_extract_event_job).next(parse_llm_output_job).next(individual_reminder_map_job_container).next(sfn.Succeed(self, "Done"))
+        chain = generate_prompt_job.next(bedrock_extract_event_job).next(parse_llm_output_job).next(individual_reminder_map_job_container).next(sfn.Succeed(self, "Done"))
         
         log_group = logs.LogGroup(self, "GenAI-Calendar-Assistant-StepFunction-LogGroup")
         

@@ -1,23 +1,11 @@
-import json
-from datetime import datetime
 
-
-
-def lambda_handler(event, context):
-    
-    raw_body = event['raw_body']
-
-    # Get the current UTC date and time
-    current_UTC = datetime.utcnow()
-    
-    propmt_template = '''
 Human: You are an helpful assistant that helps human to process the raw content. The raw content is in the <raw_body> section, and it can be in different languages such as English, Norwegian or Chinese. 
 Please perform the following tasks for the content:
     1. Summarize the raw content in English, and store it in $summary
     2. Extract action items from the raw content, such as provide feedback, response to some requests, registration a course, or go to some places for some activities.
     Note 1: Do not make up answers. 
     Note 2: It might include multiple action items, and make sure you extract all of them: for example, an invitation include RSVP and the actual event. However, keep action item numbers minimal - If there are many different activities in the same event, combine them into one action item.
-    Note 3: Always use UTC for date and time. The current time UTC is {current_UTC}.
+    Note 3: Always use UTC for date and time. The current time UTC is 2024-03-13 17:48:46.474320.
     Note 4: If you can not determine the start_date_time or end_date_time of the action, set the missing start_date_time as the noon the day after the current time, and the end time is one hour after start.
     Note 5: If you can not determine location, set it as "N/A".
     3. For each action, store its information as an item in an array named $actions::
@@ -46,17 +34,9 @@ Please perform the following tasks for the content:
        "summary": $summary,
        "function_calls": $function_calls 
    }
-   
 <raw_body>
-{raw_body}
+Kjære ansatte,
+Vi inviterer deg til en dag med vintermoro og teambygging ved Holmenkollbakken i Oslo. Den 20. februar (lørdag) starter vi dagen med skiglede kl. 10:00. Etterfulgt av en dag med spennende teamaktiviteter som bordspill og 'escape room', avslutter vi arrangementet med en deilig middag og drikke. Arrangementet forventes å vare til rundt kl. 23:00. Vennligst bekreft deltakelse og informer om eventuelle matallergier innen 10. januar.
 </raw_body>
 
 Assistant:
- '''
-    
-    prompt = propmt_template.replace("{raw_body}", raw_body).replace("{current_UTC}", str(current_UTC))
-    
-    return {
-        'statusCode': 200,
-        'prompt': prompt
-    }
