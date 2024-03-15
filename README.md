@@ -18,8 +18,8 @@ Generated calendar reminder from an email in Chinese
 You can deploy the solution by using AWS Cloud Development Kit (AWS CDK) in this repository.
 
 ### 3.1 Prerequisite
-- [Amazon Bedrock access setup](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) for Anthropic's Claude V2 model
-- [Create and verify identities in Amazon SES](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html): For allowing SES to send emails, you need to verify YOUR_SENDER_EMAIL and YOUR_RECIPIENT_EMAIL in SES. You will also pass the YOUR_SENDER_EMAIL and YOUR_RECIPIENT_EMAIL as parameters during CDK deployment
+- [Amazon Bedrock access setup](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) for Anthropic's Claude V2 model in the deployment region
+- [Create and verify identities in Amazon SES](https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html): If your Amazon SES is in sandbox mode, you need to verify YOUR_SENDER_EMAIL and YOUR_RECIPIENT_EMAIL in SES. You will also pass the YOUR_SENDER_EMAIL and YOUR_RECIPIENT_EMAIL as parameters during CDK deployment
 
 ### 3.2 Deploy the CDK stack
 
@@ -27,7 +27,6 @@ You can deploy the solution by using AWS Cloud Development Kit (AWS CDK) in this
 
 2. Synthesize the CloudFormation template and deploy
 ```
-cdk synth
 cdk deploy --parameters senderEmail=YOUR_SENDER_EMAIL --parameters recipientEmail=YOUR_RECIPIENT_EMAIL
 ```
 Take the note of the output of API Gateway endpoint "GenaiCalendarAgentStack.APIUrl", you will need it for testing and/or connect to your email webhook.
@@ -40,10 +39,14 @@ Take the note of the output of API Gateway endpoint "GenaiCalendarAgentStack.API
 You can test the solution by calling API Gateway endpoint, use [one of the sample inputs](./doc/sample-inputs/chinese1.json)
 
 ```
-curl -v -X POST [THE_VALUE_OF_GenaiCalendarAgentStack.APIUrl] -d @./doc/sample-inputs/chinese1.json --header "Content-Type: application/json"
+apigw=[THE_VALUE_OF_GenaiCalendarAgentStack.APIUrl]
+
+curl -v -X POST $apigw -d @./doc/sample-inputs/norsk1.json --header "Content-Type: application/json"
+curl -v -X POST $apigw -d @./doc/sample-inputs/chinese1.json --header "Content-Type: application/json"
+curl -v -X POST $apigw -d @./doc/sample-inputs/english1.json --header "Content-Type: application/json"
 ```
 
-Within 1-2 min, an email invitation should be sent to YOUR_RECIPIENT_EMAIL address from YOUR_SENDER_EMAIL. 
+Within 1-2 min, email invitations should be sent to YOUR_RECIPIENT_EMAIL address from YOUR_SENDER_EMAIL. 
 
 ## 5. Connect email webhook
 Thanks to the API Gateway, there are many ways to integrate this GenAI calendar assistant with your current workflow, such as Microsoft Power App, Gmail webhook, Amazon SNS and directly API call. 

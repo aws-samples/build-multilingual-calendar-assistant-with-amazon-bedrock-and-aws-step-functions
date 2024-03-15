@@ -65,7 +65,7 @@ class GenaiCalendarAgentStack(Stack):
                     image=lambda_.Runtime.PYTHON_3_9.bundling_image,
                     command=[
                         "bash", "-c",
-                        "pip install --no-cache icalendar -t /asset-output && cp -au . /asset-output" #install needed pip package
+                        "pip install --no-cache -r requirements.txt -t /asset-output && cp -au . /asset-output" #install needed pip package
                     ],
                 ),
             ),
@@ -121,14 +121,18 @@ class GenaiCalendarAgentStack(Stack):
             }
         )
         
-        # Map all extracted events and send email reminders
-        individual_reminder_map_job_container = sfn.Map(self, "individual_reminder_job_parallel_executor",
+        # For each extracted event, process them with its own logic 
+        individual_event_map_job_container = sfn.Map(self, "individual_event_processor",
             max_concurrency=1,
             items_path=sfn.JsonPath.string_at("$.parsed_completion.function_calls")
         )
         
-        pre_processing_placeholder_job = sfn.Pass(
-            self, "pre_processing_placeholder_job"
+        choice_if_send_reminder = sfn.Choice(self, "if_send_reminder")
+        
+        condition_if_send_reminder = sfn.Condition.string_equals("$.tool_name", "create-calendar-reminder")
+        
+        other_job_placeholder = sfn.Pass(
+            self, "other_job_placeholder"
         )
         
         send_email_job = tasks.LambdaInvoke(
@@ -137,10 +141,11 @@ class GenaiCalendarAgentStack(Stack):
             input_path="$.parameters"
         )
         
-        item_processor_chain = pre_processing_placeholder_job.next(send_email_job)
-        individual_reminder_map_job_container.item_processor(item_processor_chain)
+        item_processor_chain = choice_if_send_reminder.when(condition_if_send_reminder, send_email_job).otherwise(other_job_placeholder).afterwards().next(sfn.Succeed(self, "Success"))
         
-        chain = generate_prompt_job.next(bedrock_extract_event_job).next(parse_llm_output_job).next(individual_reminder_map_job_container).next(sfn.Succeed(self, "Done"))
+        individual_event_map_job_container.item_processor(item_processor_chain)
+        
+        chain = generate_prompt_job.next(bedrock_extract_event_job).next(parse_llm_output_job).next(individual_event_map_job_container)
         
         log_group = logs.LogGroup(self, "GenAI-Calendar-Assistant-StepFunction-LogGroup")
         

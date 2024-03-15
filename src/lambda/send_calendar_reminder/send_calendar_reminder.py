@@ -8,6 +8,7 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from dateutil import parser as dt_parser
 
 # If your SES account is still in the sandbox, both from and to address must be verified in SES
 sender = os.environ.get('SENDER', 'your_email@domain.com')
@@ -25,12 +26,14 @@ def lambda_handler(event, context):
   raw_body = "[Original message is]: \n " + event['raw_body']
   location = event.get("location", "N/A") #if location does not exist, set it to N/A
   
-  start_datetime = dt.datetime.strptime(event['start_datetime'], '%Y-%m-%dT%H:%M:%SZ')
-  start_datetime = tz.localize(start_datetime)
+  #start_datetime = dt.datetime.strptime(event['start_datetime'], '%Y-%m-%dT%H:%M:%SZ')
+  #start_datetime = tz.localize(start_datetime)
+  start_datetime = dt_parser.parse(event['start_datetime'], ignoretz=True)
   
-  end_datetime = dt.datetime.strptime(event['end_datetime'], '%Y-%m-%dT%H:%M:%SZ')
-  end_datetime = tz.localize(end_datetime)
-  
+  #end_datetime = dt.datetime.strptime(event['end_datetime'], '%Y-%m-%dT%H:%M:%SZ')
+  #end_datetime = tz.localize(end_datetime)
+  end_datetime = dt_parser.parse(event['end_datetime'], ignoretz=True)
+   
   # Build the calendar_event itself
   cal = icalendar.Calendar()
   cal.add('prodid', '-//My calendar application//example.com//')
@@ -100,8 +103,8 @@ if __name__ == "__main__":
     "subject": "event subject",
     "raw_body": "event raw body",
     "body": "event body",
-    "start_datetime": "2024-01-08T14:00:00Z",
-    "end_datetime": "2024-01-08T14:15:00Z",
+    "start_datetime": "2024-03-16T09:00:00Z",
+    "end_datetime": "2024-01-16T09:15:00Z",
     "location": "myhome",
   } 
   
