@@ -62,7 +62,7 @@ Generated calendar reminder from an email in Norwegian
 Generated calendar reminder from an email in Chinese
 ![Chinese](./doc/screenshot-chinese.png)
 
-## 5. Connect email webhook
+## 5. (Optional) Connect email webhook
 Thanks to the API Gateway, there are many ways to integrate this GenAI calendar assistant with your current workflow, such as Microsoft Power App, Gmail webhook, Amazon SNS and directly API call. 
 
 Here we demonstrate to use Zapier Email webhook, for connecting an email inbox with this GenAI calendar assistant. Please [follow the instruction at here](./doc/zapier-setup/readme.md).
