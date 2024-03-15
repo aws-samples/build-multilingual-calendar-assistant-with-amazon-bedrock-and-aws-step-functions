@@ -6,18 +6,19 @@ Foreigners and expats living in a foreign country are dealing large number of em
 
 ## 2. Architecture
 ![Architecture](./doc/architecture.png)
-Workflow:
+
+### Workflow:
 1. Send the original message to AWS Step Functions by using Amazon API Gateway.
 2. Use a Lambda function to generate prompt which includes system instruction, original message and other needed information such as current date/time.
 3. Invoke Bedrock foundation model (FM) to:
-- translate and summarize the original message in English. 
-- from the original message, extract event(s) information such as subject, location and time.
-- generate action plan list for event(s), for example: send a calendar reminder email for attending an event.
+    - translate and summarize the original message in English. 
+    - from the original message, extract event(s) information such as subject, location and time.
+    - generate action plan list for event(s), for example: send a calendar reminder email for attending an event.
 4. Parse the FM output to ensure it has a valid schema.
 5. Iterate the action plan list, execute step 6 for each item.
 6. Select the right tool to do the job:
-- If the action is "create-calendar-reminder", then execute A to send out calendar reminder email by using Lambda Function.
-- In the future, you can extend the solution to support other actions in B.
+    - If the action is "create-calendar-reminder", then execute A to send out calendar reminder email by using Lambda Function.
+    - In the future, you can extend the solution to support other actions in B.
 7. Done
 
 ## 3. Deployment instructions
