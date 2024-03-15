@@ -4,15 +4,21 @@
 ## 1. Introduction
 Foreigners and expats living in a foreign country are dealing large number of emails in various languages daily. They often find themselves struggling with language barriers when it comes to setting up reminders for events like business gathering and customer meetings. To solve the problem, this post shows how to apply AWS services such as Amazon Bedrock, AWS Step Functions and Amazon Simple Email Service (AWS SES) to build a fully-automated multilingual calendar AI assistant. It understands the incoming messages, translate that to preferred language and automatically setup calendar reminders.  
 
-### 1.1 Screenshots
-Generated calendar reminder from an email in Norwegian
-![Norwegian](./doc/screenshot-norsk.png)
-
-Generated calendar reminder from an email in Chinese
-![Chinese](./doc/screenshot-chinese.png)
-
 ## 2. Architecture
-
+![Architecture](./doc/architecture.png)
+Workflow:
+1. Send the original message to AWS Step Functions by using Amazon API Gateway.
+2. Use a Lambda function to generate prompt which includes system instruction, original message and other needed information such as current date/time.
+3. Invoke Bedrock foundation model (FM) to:
+- translate and summarize the original message in English. 
+- from the original message, extract event(s) information such as subject, location and time.
+- generate action plan list for event(s), for example: send a calendar reminder email for attending an event.
+4. Parse the FM output to ensure it has a valid schema.
+5. Iterate the action plan list, execute step 6 for each item.
+6. Select the right tool to do the job:
+- If the action is "create-calendar-reminder", then execute A to send out calendar reminder email by using Lambda Function.
+- In the future, you can extend the solution to support other actions in B.
+7. Done
 
 ## 3. Deployment instructions
 You can deploy the solution by using AWS Cloud Development Kit (AWS CDK) in this repository.
@@ -47,6 +53,13 @@ curl -v -X POST $apigw -d @./doc/sample-inputs/english1.json --header "Content-T
 ```
 
 Within 1-2 min, email invitations should be sent to YOUR_RECIPIENT_EMAIL address from YOUR_SENDER_EMAIL. 
+
+### 4.1 Screenshots
+Generated calendar reminder from an email in Norwegian
+![Norwegian](./doc/screenshot-norsk.png)
+
+Generated calendar reminder from an email in Chinese
+![Chinese](./doc/screenshot-chinese.png)
 
 ## 5. Connect email webhook
 Thanks to the API Gateway, there are many ways to integrate this GenAI calendar assistant with your current workflow, such as Microsoft Power App, Gmail webhook, Amazon SNS and directly API call. 

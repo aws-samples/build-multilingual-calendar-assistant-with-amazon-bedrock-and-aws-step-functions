@@ -85,7 +85,7 @@ class GenaiCalendarAgentStack(Stack):
         
         # Define step function individual tasks
         generate_prompt_job = tasks.LambdaInvoke(
-            self, "generate_prompt_job",
+            self, "generate_prompt",
             lambda_function=prompt_generator_function,
             input_path="$.body", # as we are getting input from api gateway
             result_selector={
@@ -95,7 +95,7 @@ class GenaiCalendarAgentStack(Stack):
 
 
         model = bedrock.FoundationModel.from_foundation_model_id(self, "Model", bedrock.FoundationModelIdentifier.ANTHROPIC_CLAUDE_V2)
-        bedrock_extract_event_job = tasks.BedrockInvokeModel(self, "llm_extract_events_job",
+        bedrock_extract_event_job = tasks.BedrockInvokeModel(self, "llm_extract_events",
             model=model,
             body=sfn.TaskInput.from_object({
                 "prompt.$": "$.prompt",
@@ -114,7 +114,7 @@ class GenaiCalendarAgentStack(Stack):
         )
                 
         parse_llm_output_job = tasks.LambdaInvoke(
-            self, "parse_llm_output_job",
+            self, "parse_llm_output",
             lambda_function=llm_output_parser_function,
             result_selector={
                 "parsed_completion": sfn.JsonPath.string_at("$.Payload.parsed_completion")
@@ -127,21 +127,21 @@ class GenaiCalendarAgentStack(Stack):
             items_path=sfn.JsonPath.string_at("$.parsed_completion.function_calls")
         )
         
-        choice_if_send_reminder = sfn.Choice(self, "if_send_reminder")
+        choice_job_selector = sfn.Choice(self, "job_selector")
         
-        condition_if_send_reminder = sfn.Condition.string_equals("$.tool_name", "create-calendar-reminder")
+        job_selector_condition = sfn.Condition.string_equals("$.tool_name", "create-calendar-reminder")
         
         other_job_placeholder = sfn.Pass(
             self, "other_job_placeholder"
         )
         
-        send_email_job = tasks.LambdaInvoke(
-            self, "send_email_job",
+        send_reminder_job = tasks.LambdaInvoke(
+            self, "send_reminder_job",
             lambda_function=send_calendar_reminder_function, 
             input_path="$.parameters"
         )
         
-        item_processor_chain = choice_if_send_reminder.when(condition_if_send_reminder, send_email_job).otherwise(other_job_placeholder).afterwards().next(sfn.Succeed(self, "Success"))
+        item_processor_chain = choice_job_selector.when(job_selector_condition, send_reminder_job).otherwise(other_job_placeholder).afterwards().next(sfn.Succeed(self, "Success"))
         
         individual_event_map_job_container.item_processor(item_processor_chain)
         
