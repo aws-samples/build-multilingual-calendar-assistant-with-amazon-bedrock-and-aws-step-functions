@@ -8,16 +8,16 @@ Foreigners and expats living in a foreign country are dealing large number of em
 ![Architecture](./doc/architecture.png)
 
 ### Workflow:
-1. Send the original message to AWS Step Functions by using Amazon API Gateway.
-2. Use a Lambda function to generate prompt which includes system instruction, original message and other needed information such as current date/time.
+1. The original message ([example](./doc/sample-inputs/norsk1.json)) is sent to AWS Step Functions State Machine by using Amazon API Gateway. 
+2. Use a [Lambda function](./src/lambda/prompt_generator/prompt_generator.py) to generate prompt which includes system instruction, original message and other needed information such as current date/time. (Here is the [generated prompt](./src/lambda/prompt_generator/generated_prompt_example.txt) from the example message)
 3. Invoke Bedrock foundation model (FM) to:
     - translate and summarize the original message in English. 
     - from the original message, extract event(s) information such as subject, location and time.
     - generate action plan list for event(s), for example: send a calendar reminder email for attending an event.
-4. Parse the FM output to ensure it has a valid schema.
+4. [Parse](./src/lambda/llm_output_parser/llm_output_parser.py) the FM output to ensure it has a valid schema. (Here is the [parsed result](./src/lambda/llm_output_parser/parsed_result_example.json) of the sample message)
 5. Iterate the action plan list, execute step 6 for each item.
 6. Select the right tool to do the job:
-    - If the action is "create-calendar-reminder", then execute A to send out calendar reminder email by using Lambda Function.
+    - If the action is "create-calendar-reminder", then execute A to send out calendar reminder email by using [Lambda Function](./src/lambda/send_calendar_reminder/send_calendar_reminder.py).
     - In the future, you can extend the solution to support other actions in B.
 7. Done
 

@@ -1,0 +1,29 @@
+{
+    "parsed_completion": {
+      "summary": "Jeff, the CEO, invites employees to a winter fun and team building day at Holmenkollbakken in Oslo. On February 20, they will start at 10:00 with ski sledding, followed by team activities like board games and an escape room. The event will end around 23:00 with dinner and drinks. Employees are asked to RSVP and provide any food allergy information by January 10.",
+      "function_calls": [
+        {
+          "tool_name": "create-calendar-reminder",
+          "parameters": {
+            "body": "Jeff, the CEO, invites employees to a winter fun and team building day at Holmenkollbakken in Oslo. On February 20, they will start at 10:00 with ski sledding, followed by team activities like board games and an escape room. The event will end around 23:00 with dinner and drinks. Employees are asked to RSVP and provide any food allergy information by January 10.",
+            "raw_body": "Kjære ansatte,\n\nVi inviterer deg til en dag med vintermoro og teambygging ved Holmenkollbakken i Oslo. Den 20. februar (lørdag) starter vi dagen med skiglede kl. 10:00. Etterfulgt av en dag med spennende teamaktiviteter som bordspill og 'escape room', avslutter vi arrangementet med en deilig middag og drikke. Arrangementet forventes å vare til rundt kl. 23:00. Vennligst bekreft deltakelse og informer om eventuelle matallergier innen 10. januar.\n\nSer frem til å skape minner sammen!\n\nMed vennlig hilsen,\n\nJeff\nCEO",
+            "subject": "Winter fun and team building event",
+            "start_datetime": "2024-02-20T10:00:00Z",
+            "end_datetime": "2024-02-20T23:00:00Z",
+            "location": "Holmenkollbakken, Oslo"
+          }
+        },
+        {
+          "tool_name": "create-calendar-reminder",
+          "parameters": {
+            "body": "Jeff, the CEO, invites employees to a winter fun and team building day at Holmenkollbakken in Oslo. On February 20, they will start at 10:00 with ski sledding, followed by team activities like board games and an escape room. The event will end around 23:00 with dinner and drinks. Employees are asked to RSVP and provide any food allergy information by January 10.",
+            "raw_body": "Kjære ansatte,\n\nVi inviterer deg til en dag med vintermoro og teambygging ved Holmenkollbakken i Oslo. Den 20. februar (lørdag) starter vi dagen med skiglede kl. 10:00. Etterfulgt av en dag med spennende teamaktiviteter som bordspill og 'escape room', avslutter vi arrangementet med en deilig middag og drikke. Arrangementet forventes å vare til rundt kl. 23:00. Vennligst bekreft deltakelse og informer om eventuelle matallergier innen 10. januar.\n\nSer frem til å skape minner sammen!\n\nMed vennlig hilsen,\n\nJeff\nCEO",
+            "subject": "RSVP for winter event",
+            "start_datetime": "2024-03-13T12:00:00Z",
+            "end_datetime": "2024-03-13T13:00:00Z",
+            "location": "N/A"
+          }
+        }
+      ]
+    }
+  }
